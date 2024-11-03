@@ -1,0 +1,46 @@
+name: 'Docker build'
+description: 'Build and Push the image'
+inputs:
+  repository:
+    required: false
+    default: 'ghcr.io'
+    description: 'Repository URL'
+  username:
+    required: false
+    description: 'Repository Username'
+  password:
+    required: false
+    description: 'Repository Password'
+  image-name:
+    required: true
+    description: 'Image name'
+  image-version:
+    default: ${{ github.ref_name }}
+    description: 'Image Version'
+  push:
+    default: 'false'
+    description: 'Should the image be pushed to the repo'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to GitHub Container Registry
+      if: ${{ inputs.username && inputs.password }}
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.repository }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - name: Build and Push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: Dockerfile
+        tags: ${{ inputs.repository }}/${{ inputs.image-name }}:${{ inputs.image-version }}
+        push: ${{ inputs.push == 'true' }}
+        cache-from: type=gha,scope=${{ inputs.image-name }}-${{ inputs.image-version }}
+        cache-to: type=gha,mode=max,scope=${{ inputs.image-name }}-${{ inputs.image-version }}

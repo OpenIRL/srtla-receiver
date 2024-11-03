@@ -1,0 +1,29 @@
+name: 'Release'
+
+on:
+  release:
+    types: [ published ]
+
+defaults:
+  run:
+    working-directory: html/
+
+env:
+  docker_repo: 'ghcr.io'
+  image_name: 'openirl/srtla-receiver'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Docker Build
+        uses: ./.github/actions/docker-build
+        with:
+          repository: ${{ env.docker_repo }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ env.image_name }}
+          push: true
