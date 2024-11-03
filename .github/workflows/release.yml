@@ -15,7 +15,9 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
-
+    permissions:
+      packages: write
+      contents: read
     steps:
       - uses: actions/checkout@v3
 
