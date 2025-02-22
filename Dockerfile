@@ -19,9 +19,7 @@ RUN git clone https://github.com/onsmith/srt.git srt \
 # Clone and build SRT Live Server
 RUN git clone https://github.com/OpenIRL/srt-live-server.git srt-live-server \
     && cd srt-live-server \
-    && git submodule update --init \
-    && cmake . -DCMAKE_BUILD_TYPE=Release \
-    && make -j${nproc}
+    && make -j8
 
 # Clone and build SRTla
 RUN git clone https://github.com/OpenIRL/srtla.git srtla \
