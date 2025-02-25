@@ -40,7 +40,7 @@ runs:
       with:
         context: .
         file: Dockerfile
-        tags: ${{ inputs.repository }}/${{ inputs.image-name }}:${{ inputs.image-version }}
+        tags: ${{ inputs.repository }}/${{ inputs.image-name }}:latest,${{ inputs.repository }}/${{ inputs.image-name }}:${{ inputs.image-version }}
         push: ${{ inputs.push == 'true' }}
         cache-from: type=gha,scope=${{ inputs.image-name }}-${{ inputs.image-version }}
         cache-to: type=gha,mode=max,scope=${{ inputs.image-name }}-${{ inputs.image-version }}
