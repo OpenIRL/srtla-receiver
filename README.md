@@ -31,7 +31,7 @@ docker run -d --restart unless-stopped --name srtla-receiver \
 
 To use the started container you can use the following scheme:
 
-### Send stream
+### Sending a Stream
 #### SRTla
 
 | Type | URL |
