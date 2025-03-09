@@ -22,7 +22,7 @@ RUN git clone https://github.com/OpenIRL/srt-live-server.git srt-live-server \
     && make -j8
 
 # Clone and build SRTla
-RUN git clone https://github.com/OpenIRL/srtla.git srtla \
+RUN git clone -b next https://github.com/OpenIRL/srtla.git srtla \
     && cd srtla \
     && git submodule update --init --recursive \
     && cmake . \
