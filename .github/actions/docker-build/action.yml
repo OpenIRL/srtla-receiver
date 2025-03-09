@@ -34,13 +34,34 @@ runs:
         registry: ${{ inputs.repository }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
+    
+    # Determine additional tag based on branch
+    - name: Set additional tag
+      id: set-tag
+      shell: bash
+      run: |
+        # Determine branch first
+        if [[ "${{ github.event_name }}" == "release" && -n "${{ github.event.release.target_commitish }}" ]]; then
+          BRANCH="${{ github.event.release.target_commitish }}"
+        else
+          BRANCH="${{ github.ref_name }}"
+        fi
+        
+        # Set tag based on branch
+        if [[ "$BRANCH" == "main" ]]; then
+          echo "TAG=latest" >> $GITHUB_OUTPUT
+        else
+          echo "TAG=next" >> $GITHUB_OUTPUT
+        fi
 
     - name: Build and Push
       uses: docker/build-push-action@v4
       with:
         context: .
         file: Dockerfile
-        tags: ${{ inputs.repository }}/${{ inputs.image-name }}:${{ inputs.image-version }}
+        tags: |
+          ${{ inputs.repository }}/${{ inputs.image-name }}:${{ inputs.image-version }}
+          ${{ inputs.repository }}/${{ inputs.image-name }}:${{ steps.set-tag.outputs.TAG }}
         push: ${{ inputs.push == 'true' }}
         cache-from: type=gha,scope=${{ inputs.image-name }}-${{ inputs.image-version }}
         cache-to: type=gha,mode=max,scope=${{ inputs.image-name }}-${{ inputs.image-version }}
