@@ -4,10 +4,6 @@ on:
   release:
     types: [ published ]
 
-defaults:
-  run:
-    working-directory: html/
-
 env:
   docker_repo: 'ghcr.io'
   image_name: 'openirl/srtla-receiver'
