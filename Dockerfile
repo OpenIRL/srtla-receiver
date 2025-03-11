@@ -9,18 +9,6 @@ RUN apk update \
     && apk add --no-cache linux-headers alpine-sdk cmake tcl openssl-dev zlib-dev spdlog spdlog-dev \
     && rm -rf /var/cache/apk/*
 
-# Clone, build and install belabox-patched SRT
-RUN git clone https://github.com/onsmith/srt.git srt \
-    && cd srt \
-    && ./configure \
-    && make -j${nproc} \
-    && make install
-
-# Clone and build SRT Live Server
-RUN git clone https://github.com/OpenIRL/srt-live-server.git srt-live-server \
-    && cd srt-live-server \
-    && make -j8
-
 # Clone and build SRTla
 RUN git clone https://github.com/OpenIRL/srtla.git srtla \
     && cd srtla \
@@ -38,17 +26,20 @@ RUN apk update \
     && rm -rf /var/cache/apk/*
 
 # Copy binaries from the builder stage
-COPY --from=builder /tmp/srt-live-server/bin /usr/local/bin
 COPY --from=builder /tmp/srtla/srtla_rec /usr/local/bin
-COPY --from=builder /usr/local/bin/srt-* /usr/local/bin
-COPY --from=builder /usr/local/lib/libsrt* /usr/local/lib
 
-# copy configuration files
-COPY conf/sls.conf /etc/sls/sls.conf
-COPY conf/supervisord.conf /etc/supervisord.conf
+# Copy binaries from the srt-live-server
+COPY --from=ghcr.io/openirl/srt-live-server:latest /usr/local/bin/* /usr/local/bin
+COPY --from=ghcr.io/openirl/srt-live-server:latest /usr/local/lib/libsrt* /usr/local/lib
 
-# copy bin files
+# Copy binary files from the repo
 COPY --chmod=755 bin/logprefix /bin/logprefix
+
+# Copy configuration files from the srt-live-server
+COPY --from=ghcr.io/openirl/srt-live-server:latest /etc/sls/sls.conf /etc/sls/sls.conf
+
+# Copy configuration files from the repo
+COPY conf/supervisord.conf /etc/supervisord.conf
 
 # Expose ports
 EXPOSE 5000/udp 4001/udp 8080/tcp
