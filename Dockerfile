@@ -30,14 +30,14 @@ RUN apk update \
 COPY --from=builder /tmp/srtla/srtla_rec /usr/local/bin
 
 # Copy binaries from the srt-live-server
-COPY --from=ghcr.io/openirl/srt-live-server:latest /usr/local/bin/* /usr/local/bin
-COPY --from=ghcr.io/openirl/srt-live-server:latest /usr/local/lib/libsrt* /usr/local/lib
+COPY --from=ghcr.io/openirl/srt-live-server:next /usr/local/bin/* /usr/local/bin
+COPY --from=ghcr.io/openirl/srt-live-server:next /usr/local/lib/libsrt* /usr/local/lib
 
 # Copy binary files from the repo
 COPY --chmod=755 bin/logprefix /bin/logprefix
 
 # Copy configuration files from the srt-live-server
-COPY --from=ghcr.io/openirl/srt-live-server:latest /etc/sls/sls.conf /etc/sls/sls.conf
+COPY --from=ghcr.io/openirl/srt-live-server:next /etc/sls/sls.conf /etc/sls/sls.conf
 
 # Copy configuration files from the repo
 COPY conf/supervisord.conf /etc/supervisord.conf
