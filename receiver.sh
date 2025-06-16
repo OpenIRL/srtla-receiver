@@ -379,9 +379,9 @@ create_data_directory() {
         mkdir -p data
         echo -e "${BLUE}→ data directory created.${NC}"
         
-        # Try to set owner to nobody:nobody
-        if sudo chown nobody:nobody data 2>/dev/null; then
-            echo -e "${GREEN}✓ data directory ownership set to nobody:nobody.${NC}"
+        # Try to set owner to nobody:nogroup
+        if sudo chown nobody:nogroup data 2>/dev/null; then
+            echo -e "${GREEN}✓ data directory ownership set to nobody:nogroup.${NC}"
         else
             echo -e "${YELLOW}Warning: Could not change data directory ownership. This is normal on some systems.${NC}"
         fi
@@ -390,10 +390,10 @@ create_data_directory() {
         
         # Check and fix ownership if needed
         local current_owner=$(stat -c "%U:%G" data 2>/dev/null || echo "unknown")
-        if [ "$current_owner" != "nobody:nobody" ]; then
+        if [ "$current_owner" != "nobody:nogroup" ]; then
             echo -e "${YELLOW}→ Fixing data directory ownership...${NC}"
-            if sudo chown nobody:nobody data 2>/dev/null; then
-                echo -e "${GREEN}✓ data directory ownership corrected to nobody:nobody.${NC}"
+            if sudo chown nobody:nogroup data 2>/dev/null; then
+                echo -e "${GREEN}✓ data directory ownership corrected to nobody:nogroup.${NC}"
             else
                 echo -e "${YELLOW}Warning: Could not change data directory ownership. This is normal on some systems.${NC}"
             fi
