@@ -1,0 +1,34 @@
+services:
+  sls-management-ui:
+    image: ghcr.io/openirl/sls-management-ui:latest
+    container_name: sls-management-ui
+    environment:
+      REACT_APP_BASE_URL: "${APP_URL}"
+      REACT_SRT_PLAYER_PORT: "${SRT_PLAYER_PORT:-4000}"
+      REACT_SRT_SENDER_PORT: "${SRT_SENDER_PORT:-4001}"
+      REACT_SLS_STATS_PORT: "${SLS_STATS_PORT:-8080}"
+      REACT_SRTLA_PORT: "${SRTLA_PORT:-5000}"
+    ports:
+      - "${SLS_MGNT_PORT}:3000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  receiver:
+    image: ghcr.io/openirl/srtla-receiver:next
+    container_name: srtla-receiver
+    restart: unless-stopped
+    ports:
+      - "${SLS_STATS_PORT}:8080/tcp"
+      - "${SRTLA_PORT}:5000/udp"
+      - "${SRT_SENDER_PORT}:4001/udp"
+      - "${SRT_PLAYER_PORT}:4000/udp"
+    volumes:
+      - ./data:/var/lib/sls # Persistent storage for database
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
