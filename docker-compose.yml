@@ -20,6 +20,8 @@ services:
     build: .
     container_name: srtla-receiver
     restart: unless-stopped
+    environment:
+      SRTLA_LOG_LEVEL: "${SRTLA_LOG_LEVEL}"
     ports:
       - "${SLS_STATS_PORT}:8080/tcp"
       - "${SRTLA_PORT}:5000/udp"
