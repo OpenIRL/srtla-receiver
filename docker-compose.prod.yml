@@ -17,7 +17,7 @@ services:
         max-file: "3"
 
   receiver:
-    image: ghcr.io/openirl/srtla-receiver:next
+    image: ghcr.io/openirl/srtla-receiver:latest
     container_name: srtla-receiver
     restart: unless-stopped
     ports:

@@ -25,6 +25,10 @@ RUN apk update \
     && apk add --no-cache openssl libstdc++ supervisor coreutils spdlog perl \
     && rm -rf /var/cache/apk/*
 
+# Create service users for security isolation
+RUN adduser -D -u 3001 -s /bin/sh sls \
+    && adduser -D -u 3002 -s /bin/sh srtla
+
 # Copy binaries from the builder stage
 COPY --from=builder /tmp/srtla/srtla_rec /usr/local/bin
 
@@ -42,7 +46,7 @@ COPY --from=ghcr.io/openirl/srt-live-server:latest /etc/sls/sls.conf /etc/sls/sl
 COPY conf/supervisord.conf /etc/supervisord.conf
 
 # Expose ports
-EXPOSE 5000/udp 4001/udp 8080/tcp
+EXPOSE 5000/udp 4000/udp 4001/udp 8080/tcp
 
 # Start supervisor
 CMD ["/usr/bin/supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
