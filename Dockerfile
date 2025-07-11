@@ -1,6 +1,9 @@
 # Builder Stage
 FROM alpine:3.20 AS builder
 
+# Build arguments for SRTla branch selection
+ARG SRTLA_BRANCH=main
+
 ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib64
 WORKDIR /tmp
 
@@ -10,11 +13,15 @@ RUN apk update \
     && rm -rf /var/cache/apk/*
 
 # Clone and build SRTla
-RUN git clone https://github.com/OpenIRL/srtla.git srtla \
+RUN git clone -b ${SRTLA_BRANCH} https://github.com/OpenIRL/srtla.git srtla \
     && cd srtla \
     && git submodule update --init --recursive \
     && cmake . \
     && make -j${nproc}
+
+# SLS Stage
+ARG SLS_TAG=latest
+FROM ghcr.io/openirl/srt-live-server:${SLS_TAG} AS sls-stage
 
 # Final Stage
 FROM alpine:3.20
@@ -33,14 +40,14 @@ RUN adduser -D -u 3001 -s /bin/sh sls \
 COPY --from=builder /tmp/srtla/srtla_rec /usr/local/bin
 
 # Copy binaries from the srt-live-server
-COPY --from=ghcr.io/openirl/srt-live-server:latest /usr/local/bin/* /usr/local/bin
-COPY --from=ghcr.io/openirl/srt-live-server:latest /usr/local/lib/libsrt* /usr/local/lib
+COPY --from=sls-stage /usr/local/bin/* /usr/local/bin
+COPY --from=sls-stage /usr/local/lib/libsrt* /usr/local/lib
 
 # Copy binary files from the repo
 COPY --chmod=755 bin/logprefix /bin/logprefix
 
 # Copy configuration files from the srt-live-server
-COPY --from=ghcr.io/openirl/srt-live-server:latest /etc/sls/sls.conf /etc/sls/sls.conf
+COPY --from=sls-stage /etc/sls/sls.conf /etc/sls/sls.conf
 
 # Copy configuration files from the repo
 COPY conf/supervisord.conf /etc/supervisord.conf

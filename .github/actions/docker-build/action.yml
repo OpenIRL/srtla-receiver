@@ -20,13 +20,16 @@ inputs:
   push:
     default: 'false'
     description: 'Should the image be pushed to the repo'
+  srtla-branch:
+    default: 'main'
+    description: 'SRTla branch to build from (main/next)'
+  sls-tag:
+    default: 'latest'
+    description: 'SRT-Live-Server tag to use (latest/next)'
 
 runs:
   using: 'composite'
   steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -38,23 +41,18 @@ runs:
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
     
-    # Determine additional tag based on branch
+    # Determine additional tag based on release type
     - name: Set additional tag
       id: set-tag
       shell: bash
       run: |
-        # Determine branch first
-        if [[ "${{ github.event_name }}" == "release" && -n "${{ github.event.release.target_commitish }}" ]]; then
-          BRANCH="${{ github.event.release.target_commitish }}"
-        else
-          BRANCH="${{ github.ref_name }}"
-        fi
-        
-        # Set tag based on branch
-        if [[ "$BRANCH" == "main" ]]; then
-          echo "TAG=latest" >> $GITHUB_OUTPUT
-        else
+        # Check if this is a pre-release
+        if [[ "${{ github.event_name }}" == "release" && "${{ github.event.release.prerelease }}" == "true" ]]; then
           echo "TAG=next" >> $GITHUB_OUTPUT
+          echo "Pre-release detected: using next tag"
+        else
+          echo "TAG=latest" >> $GITHUB_OUTPUT
+          echo "Stable release detected: using latest tag"
         fi
 
     - name: Build and Push
@@ -63,6 +61,9 @@ runs:
         context: .
         platforms: linux/amd64,linux/arm64
         file: Dockerfile
+        build-args: |
+          SRTLA_BRANCH=${{ inputs.srtla-branch }}
+          SLS_TAG=${{ inputs.sls-tag }}
         tags: |
           ${{ inputs.repository }}/${{ inputs.image-name }}:${{ inputs.image-version }}
           ${{ inputs.repository }}/${{ inputs.image-name }}:${{ steps.set-tag.outputs.TAG }}
