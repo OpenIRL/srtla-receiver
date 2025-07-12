@@ -1,8 +1,12 @@
+# Build arguments that need to be available globally
+ARG SRTLA_BRANCH=main
+ARG SLS_TAG=latest
+
 # Builder Stage
 FROM alpine:3.20 AS builder
 
-# Build arguments for SRTla branch selection
-ARG SRTLA_BRANCH=main
+# Redeclare build argument for this stage
+ARG SRTLA_BRANCH
 
 ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib64
 WORKDIR /tmp
@@ -20,7 +24,8 @@ RUN git clone -b ${SRTLA_BRANCH} https://github.com/OpenIRL/srtla.git srtla \
     && make -j${nproc}
 
 # SLS Stage
-ARG SLS_TAG=latest
+# Redeclare build argument for this stage
+ARG SLS_TAG
 FROM ghcr.io/openirl/srt-live-server:${SLS_TAG} AS sls-stage
 
 # Final Stage
