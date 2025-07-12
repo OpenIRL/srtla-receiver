@@ -17,6 +17,62 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Determine version strategy based on release type and validate overrides
+      - name: Determine version strategy
+        id: version-strategy
+        shell: bash
+        run: |
+          # Default values for both release types
+          SRTLA_BRANCH="main"
+          SLS_TAG="latest"
+          
+          # Check if this is a pre-release
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            RELEASE_TYPE="pre-release"
+            echo "Pre-release detected: using main/latest by default, overrides required"
+          else
+            RELEASE_TYPE="stable"
+            echo "Stable release detected: using main/latest"
+          fi
+          
+          # Check release description for component overrides
+          RELEASE_DESCRIPTION="${{ github.event.release.body }}"
+          
+          # Check for SRTla version override
+          if echo "$RELEASE_DESCRIPTION" | grep -qi "srtla:next"; then
+            if [[ "$RELEASE_TYPE" == "stable" ]]; then
+              echo "ERROR: srtla:next is not allowed in stable releases"
+              exit 1
+            fi
+            SRTLA_BRANCH="next"
+            echo "SRTla override: using next branch"
+          fi
+          
+          # Check for SLS version override
+          if echo "$RELEASE_DESCRIPTION" | grep -qi "sls:next"; then
+            if [[ "$RELEASE_TYPE" == "stable" ]]; then
+              echo "ERROR: sls:next is not allowed in stable releases"
+              exit 1
+            fi
+            SLS_TAG="next"
+            echo "SLS override: using next tag"
+          fi
+          
+          # Validate that pre-releases have at least one next component
+          if [[ "$RELEASE_TYPE" == "pre-release" && "$SRTLA_BRANCH" == "main" && "$SLS_TAG" == "latest" ]]; then
+            echo "ERROR: Pre-releases must use at least one next component (srtla:next or sls:next)"
+            exit 1
+          fi
+          
+          # Set outputs
+          echo "SRTLA_BRANCH=$SRTLA_BRANCH" >> $GITHUB_OUTPUT
+          echo "SLS_TAG=$SLS_TAG" >> $GITHUB_OUTPUT
+          
+          echo "Version configuration:"
+          echo "  Release type: $RELEASE_TYPE"
+          echo "  SRTla branch: $SRTLA_BRANCH"
+          echo "  SLS tag: $SLS_TAG"
+
       - name: Docker Build
         uses: ./.github/actions/docker-build
         with:
@@ -24,4 +80,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ env.image_name }}
+          srtla-branch: ${{ steps.version-strategy.outputs.SRTLA_BRANCH }}
+          sls-tag: ${{ steps.version-strategy.outputs.SLS_TAG }}
           push: true
