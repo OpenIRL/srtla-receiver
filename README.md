@@ -70,8 +70,8 @@ To use the started container, open the management URL (e.g., `http://127.0.0.1:3
 
 | Type    | URL                                                                   |
 |---------|-----------------------------------------------------------------------|
-| Schema  | `srt://<your-ip>:4001?streamid=<play-key>`                            |
-| Example | `srt://127.0.0.1:4001?streamid=play_60a0055a7fdb436d92fab3a943f5c55c` |
+| Schema  | `srt://<your-ip>:4000?streamid=<play-key>`                            |
+| Example | `srt://127.0.0.1:4000?streamid=play_60a0055a7fdb436d92fab3a943f5c55c` |
 
 ## Statistics Integration
 
