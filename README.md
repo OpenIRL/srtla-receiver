@@ -84,7 +84,7 @@ The SRTla Receiver provides a statistics interface that can be used for integrat
 | Schema  | `http://<your-ip>:8080/stats/<play-id>`                             |
 | Example | `http://127.0.0.1:8080/stats/play_60a0055a7fdb436d92fab3a943f5c55c` |
 
-### Statistics Endpoint (Legacy)
+### Statistics Endpoint Legacy (NOALBS version < 2.14.0)
 
 | Type             | URL                                                                          |
 |------------------|------------------------------------------------------------------------------|
@@ -96,6 +96,30 @@ The SRTla Receiver provides a statistics interface that can be used for integrat
 To use the SRTla Receiver with NOALBS, you can specify the statistics endpoint in your NOALBS configuration. This allows
 for automatic scene switching based on stream metrics.
 Example NOALBS configuration:
+
+```json
+{
+   # rest of the config ...
+      "switcher": {
+         # rest of the config ...
+            "streamServers": [
+                {
+                  "streamServer": {
+                     "type": "OpenIRL",
+                     "statsUrl": "http://127.0.0.1:8080/stats/play_60a0055a7fdb436d92fab3a943f5c55c"
+                  },
+                  "name": "Stream",
+                  "priority": 0,
+                  "enabled": true
+               }
+            ]
+         # rest of the config ...
+      }
+   # rest of the config ...
+}
+```
+<details>
+<summary>NOLABS Version < 2.14.0</summary>
 
 ```json
 {
@@ -119,6 +143,8 @@ Example NOALBS configuration:
    # rest of the config ...
 }
 ```
+
+</details>
 
 ## Troubleshooting
 
