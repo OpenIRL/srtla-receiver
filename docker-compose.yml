@@ -2,7 +2,6 @@ services:
   sls-management-ui:
     image: ghcr.io/openirl/sls-management-ui:latest
     container_name: sls-management-ui
-    restart: unless-stopped
     environment:
       REACT_APP_BASE_URL: "${APP_URL}"
       REACT_APP_SRT_PLAYER_PORT: "${SRT_PLAYER_PORT:-4000}"
@@ -18,9 +17,11 @@ services:
         max-file: "3"
 
   receiver:
-    image: ghcr.io/openirl/srtla-receiver:next
+    build: .
     container_name: srtla-receiver
     restart: unless-stopped
+    environment:
+      SRTLA_LOG_LEVEL: "${SRTLA_LOG_LEVEL}"
     ports:
       - "${SLS_STATS_PORT}:8080/tcp"
       - "${SRTLA_PORT}:5000/udp"

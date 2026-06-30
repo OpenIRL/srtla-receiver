@@ -32,6 +32,7 @@ FROM ghcr.io/openirl/srt-live-server:${SLS_TAG} AS sls-stage
 FROM alpine:3.20
 
 ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib64
+ENV SRTLA_LOG_LEVEL=info
 
 RUN apk update \
     && apk add --no-cache openssl libstdc++ supervisor coreutils spdlog perl \
